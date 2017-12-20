@@ -1,0 +1,167 @@
+<!--
+Copyright 2017 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<html>
+  <head>
+    <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
+    <script>
+      // Initializes Firebase.
+      //[START firebase_client_config]
+      var config = {
+        apiKey: "<API_KEY>",
+        authDomain: "<PROJECT_ID>.firebaseapp.com",
+        databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
+        storageBucket: "<BUCKET>.appspot.com",
+        messagingSenderId: "<SENDER_ID>",
+      };
+      //[END firebase_client_config]
+      firebase.initializeApp(config);
+
+      // Gets a reference to the database service.
+      var database = firebase.database();
+
+      // Creates an empty ticket object to be used in the form.
+      var ticket = {};
+
+      /*
+       * Writes a ticket to the Firebase Database.
+       * @param {Ticket} t A ticket to write to the database.
+       */
+      function writeTicketData(t) {
+        let fbTicket = {
+          contact_id: t.contact_id === undefined ? "" : t.contact_id,
+          seniority: t.seniority === undefined ? "" : t.seniority,
+          p_experience: t.p_experience === undefined ? "" : t.p_experience,
+          category: t.category === undefined ? "" : t.category,
+          type: t.type === undefined ? "" : t.type,
+          impact: t.impact === undefined ? "" : t.impact,
+          description: t.description === undefined ? "" : t.description
+        }
+        firebase.database().ref('tickets').push(fbTicket);
+      }
+
+      /*
+      * Adds a the ticket information to the DOM so it displays on the page.
+      * @param {Ticket} ticketId A Firebase ticket id.
+      * @param {string} ticket A Firbase ticket.
+      */
+      function addTicketToDOM(ticketId, ticket){
+        // Creates a new div element with user info.
+        let newTicketDiv = document.createElement("div");
+        newTicketDiv.setAttribute("id", ticketId);
+        newTicketDiv.innerHTML = `
+          <b>Ticket ${ticketId}</b><br/>
+          <i>--Data--</i></b><br/>
+          contact_id: ${ticket.contact_id}<br/>
+          seniority: ${ticket.seniority}<br/>
+          p_experience: ${ticket.p_experience}<br/>
+          owner_id: ${ticket.owner_id}<br/>
+          category: ${ticket.category}<br/>
+          type: ${ticket.type}<br/>
+          impact: ${ticket.impact}<br/>
+          description: ${ticket.description}<br/>
+          <i>--Predictions--</i></b><br/>
+          sentiment: ${ticket.pred_sentiment}<br/>
+          tags: ${ticket.tags}<br/>
+          priority: ${ticket.pred_priority}<br/>
+          t_resolution: ${ticket.pred_resolution_time}<br/>
+          <br/>
+        `
+        // Adds the newly created element and its content into the DOM.
+        let ticketsListDom = document.getElementById("tickets_list");
+        ticketsListDom.appendChild(newTicketDiv);
+      }
+
+      // Continuously listens for actions taken on tickets in Firebase DB.
+      var ticketsRef = firebase.database().ref('tickets');
+
+      /*
+       * Listens when a ticket is added to Firebase database.
+       * Adds the ticket to the DOM when that happens.
+       */
+      ticketsRef.on('child_added', function(data) {
+        addTicketToDOM(data.key, data.val());
+      });
+
+      /*
+       * Listens when a ticket is deleted from Firebase database.
+       * Removes the ticket from the DOM when that happens.
+       */
+      ticketsRef.on('child_removed', function(data) {
+        let ticketsListDom = document.getElementById("tickets_list");
+        ticketsListDom.removeChild(document.getElementById(data.key));
+      });
+
+      /*
+       * Listens when a ticket is updated in Firevase Database.
+       * Removes and adds the ticket with its updated properties
+       */
+      ticketsRef.on("child_changed", function(data) {
+        let ticketsListDom = document.getElementById("tickets_list");
+        ticketsListDom.removeChild(document.getElementById(data.key));
+        addTicketToDOM(data.key, data.val());
+      });
+
+    </script>
+  </head>
+
+  <body>
+    <h3>Create ticket</h3>
+
+    <input type="text" id="contact_id" placeholder="contact_id"
+      onchange="ticket.contact_id=this.value"> <br/>
+    <input type="text" id="seniority" placeholder="seniority"
+      onchange="ticket.seniority=this.value"> <br/>
+    <select id="p_experience" onchange="ticket.p_experience=this.value">
+      <option value="0">Choose Experience</option>
+      <option value="1-Beginner">1-Beginner</option>
+      <option value="2-Experienced">2-Experienced</option>
+      <option value="3-Advanced">3-Advanced</option>
+      <option value="4-Trainer">4-Trainer</option>
+    </select> <br/>
+    <select id="category" onchange="ticket.category=this.value">
+      <option value="0">Choose Category</option>
+      <option value="Technical">Technical</option>
+      <option value="Performance">Performance</option>
+      <option value="Authentication">Authentication</option>
+      <option value="Billing">Billing</option>
+    </select> <br/>
+    <select id="type" onchange="ticket.type=this.value">
+      <option value="0">Choose Type</option>
+      <option value="Request">Request</option>
+      <option value="Issue">Issue</option>
+    </select> <br/>
+    <select id="impact" onchange="ticket.impact=this.value">
+      <option value="0">Choose Impact</option>
+      <option value="0-Unclassified">0-Unclassified</option>
+      <option value="1-Minor">1-Minor</option>
+      <option value="2-Normal">2-Normal</option>
+      <option value="3-Major">3-Major</option>
+      <option value="4-Critical">4-Critical</option>
+    </select> <br/>
+    <textarea type="text" id="description" placeholder="description"
+      onchange="ticket.description=this.value"></textarea>
+
+    <input type="button" onClick='writeTicketData(ticket)' value="Create">
+
+    <h3>Tickets List</h3>
+    <div id="tickets_list">
+      <!-- Tickets will be added here -->
+    </div>
+
+  </body>
+
+</html>
