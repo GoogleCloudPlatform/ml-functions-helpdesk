@@ -24,7 +24,7 @@ const language = Language({ apiVersion: 'v1beta2' });
 const google = require('googleapis');
 const jsforce = require('jsforce');
 
-//#[START model_configurations]
+//[START model_configurations]
 const MDL_PROJECT_NAME = <YOUR_PROJECT_HOSTING_MODELS>;
 const RESOLUTION_TIME_MODEL_NAME = 'mdl_helpdesk_priority'; # Matches Notebook
 const PRIORITY_MODEL_NAME = 'mdl_helpdesk_resolution_time'; # Matches Notebook
@@ -32,7 +32,7 @@ const SFDC_URL = <YOUR_SFDC_URL>;
 const SFDC_LOGIN = <YOUR_SFDC_LOGIN>;
 const SFDC_PASSWORD = <YOUR_SFDC_PASSWORD>;
 const SFDC_TOKEN = <YOUR_SFDC_TOKEN>;
-//#[END model_configurations]
+//[END model_configurations]
 
 /*
  * PRIORITY
@@ -58,7 +58,7 @@ exports.priority = functions.database.ref('/tickets/{ticketID}').onCreate(event 
      return cb(err);
    }
 
-   //#[START ml_engine_auth]
+   //[START ml_engine_auth]
    if (authClient.createScopedRequired && authClient.createScopedRequired()) {
      // https://developers.google.com/identity/protocols/googlescopes#mlv1
      authClient = authClient.createScoped([
@@ -71,7 +71,7 @@ exports.priority = functions.database.ref('/tickets/{ticketID}').onCreate(event 
      version: 'v1',
      auth: authClient
    });
-   //#[END ml_engine_auth]
+   //[END ml_engine_auth]
 
    // Prediction
    ml.projects.predict({
@@ -116,7 +116,7 @@ exports.resolutiontime = functions.database.ref('/tickets/{ticketID}').onCreate(
     return;
   }
 
-  //[START] ml_auth
+  //[START ml_auth]
   google.auth.getApplicationDefault(function(err, authClient) {
     if (err) {
       return cb(err);
@@ -134,7 +134,7 @@ exports.resolutiontime = functions.database.ref('/tickets/{ticketID}').onCreate(
       version: 'v1',
       auth: authClient
     });
-  //[END] ml_auth
+  //[END ml_auth]
 
     //Prediction
     ml.projects.predict({
@@ -256,16 +256,16 @@ exports.updateSFDC = functions.database.ref('/tickets/{ticketID}').onWrite(event
   var jsforce = require('jsforce');
   var conn = new jsforce.Connection();
 
-  //#[START conn_sfdc]
+  //[START conn_sfdc]
   conn = new jsforce.Connection({
     loginUrl : SFDC_URL
   });
   conn.login(SFDC_LOGIN, SFDC_PASSWORD + SFDC_TOKEN, function(err, res) {
-  //#[END conn_sfdc]
+  //[END conn_sfdc]
     if (err) {
       return console.error('SFDC ERROR', err);
     }
-    //#[START create_ticket_sfdc]
+    //[START create_ticket_sfdc]
     conn.sobject("Case").create({
       SuppliedEmail: 'user@example.com',
       Description: ticket.description,
@@ -274,7 +274,7 @@ exports.updateSFDC = functions.database.ref('/tickets/{ticketID}').onWrite(event
       Priority: ticket.priority,
       ResolutionTime__c: ticket.t_resolution
     }, function(err, ret) {
-    //#[END create_ticket_sfdc]
+    //[END create_ticket_sfdc]
       if (err || !ret.success) {
         return console.error(err, ret);
       }
