@@ -196,7 +196,7 @@ exports.sentiment = functions.database.ref('/tickets/{ticketID}').onCreate(event
      console.error('ERROR detectSentiment:', err);
   });
 });
-//[START nlp_prediction]
+//[END nlp_prediction]
 
 
 /*
