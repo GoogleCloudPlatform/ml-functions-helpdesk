@@ -195,9 +195,9 @@ exports.sentiment = functions.database.ref('/tickets/{ticketID}').onCreate(event
   .catch((err) => {
      console.error('ERROR detectSentiment:', err);
   });
-});
-//[END nlp_prediction]
+  //[END nlp_prediction]
 
+});
 
 /*
 * TAGS
