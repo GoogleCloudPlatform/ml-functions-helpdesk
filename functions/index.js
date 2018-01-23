@@ -136,7 +136,7 @@ exports.resolutiontime = functions.database.ref('/tickets/{ticketID}').onCreate(
     });
   //[END ml_auth]
 
-    //Prediction
+    //[START resolution_prediction]
     ml.projects.predict({
       name: `projects/${MDL_PROJECT_NAME}/models/${RESOLUTION_TIME_MODEL_NAME}`,
       resource: {
@@ -146,7 +146,9 @@ exports.resolutiontime = functions.database.ref('/tickets/{ticketID}').onCreate(
           ${ticket.type},${ticket.impact}`
         ]
       }
-    }, function (err, result){
+    },
+    //[END resolution_prediction]
+    function (err, result){
       if (err){
         console.error('ERROR RESOLUTION TIME', err)
       }
@@ -181,6 +183,7 @@ exports.sentiment = functions.database.ref('/tickets/{ticketID}').onCreate(event
    return;
  }
 
+ //[START nlp_prediction]
  const text = ticket.description;
  const document = language.document({content: text});
 
@@ -193,6 +196,7 @@ exports.sentiment = functions.database.ref('/tickets/{ticketID}').onCreate(event
      console.error('ERROR detectSentiment:', err);
   });
 });
+//[START nlp_prediction]
 
 
 /*
